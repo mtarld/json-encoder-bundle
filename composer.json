@@ -1,0 +1,26 @@
+{
+    "name": "mtarld/json-encoder-bundle",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "description": "A Symfony Bundle that provides powerful methods to encode/decode data structures into/from JSON.",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.2",
+        "nikic/php-parser": "^4.17|^5.0",
+        "phpstan/phpdoc-parser": "^1.0",
+        "psr/container": "^2.0|^3.0",
+        "psr/log": "^1|^2|^3",
+        "symfony/framework-bundle": "^7.0",
+        "symfony/type-info": "7.1.x-dev",
+        "symfony/var-exporter": "^7.1"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": { "Mtarld\\JsonEncoderBundle\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Mtarld\\JsonEncoderBundle\\Tests\\": "tests/" }
+    }
+}
