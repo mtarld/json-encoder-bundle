@@ -15,6 +15,8 @@ use Mtarld\JsonEncoderBundle\CacheWarmer\EncoderDecoderCacheWarmer;
 use Mtarld\JsonEncoderBundle\CacheWarmer\LazyGhostCacheWarmer;
 use Mtarld\JsonEncoderBundle\JsonDecoder;
 use Mtarld\JsonEncoderBundle\JsonEncoder;
+use Mtarld\JsonEncoderBundle\JsonDecoderInterface;
+use Mtarld\JsonEncoderBundle\JsonEncoderInterface;
 use Mtarld\JsonEncoderBundle\Mapping\Decode\AttributePropertyMetadataLoader as DecodeAttributePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\Decode\DateTimeTypePropertyMetadataLoader as DecodeDateTimeTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\Encode\AttributePropertyMetadataLoader as EncodeAttributePropertyMetadataLoader;
@@ -37,8 +39,8 @@ return static function (ContainerConfigurator $container) {
                 param('kernel.cache_dir'),
                 service('.json_encoder.runtime_services')->nullOnInvalid(),
             ])
-        ->alias(JsonEncoder::class, 'json_encoder.encoder')
-        ->alias(JsonDecoder::class, 'json_encoder.decoder')
+        ->alias(JsonEncoderInterface::class, 'json_encoder.encoder')
+        ->alias(JsonDecoderInterface::class, 'json_encoder.decoder')
 
         // metadata
         ->stack('json_encoder.encode.property_metadata_loader', [
