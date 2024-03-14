@@ -23,6 +23,7 @@ use Mtarld\JsonEncoderBundle\Mapping\Encode\AttributePropertyMetadataLoader as E
 use Mtarld\JsonEncoderBundle\Mapping\Encode\DateTimeTypePropertyMetadataLoader as EncodeDateTimeTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -43,11 +44,17 @@ return static function (ContainerConfigurator $container) {
         ->alias(JsonDecoderInterface::class, 'json_encoder.decoder')
 
         // metadata
+        ->set('.json_encoder.type_resolver', TypeResolver::class)
+            ->args([
+                service('type_info.resolver'),
+                service('type_info.type_context_factory'),
+            ])
+
         ->stack('json_encoder.encode.property_metadata_loader', [
             inline_service(EncodeAttributePropertyMetadataLoader::class)
                 ->args([
                     service('.inner'),
-                    service('type_info.resolver'),
+                    service('.json_encoder.type_resolver'),
                 ]),
             inline_service(EncodeDateTimeTypePropertyMetadataLoader::class)
                 ->args([
@@ -60,7 +67,7 @@ return static function (ContainerConfigurator $container) {
                 ]),
             inline_service(PropertyMetadataLoader::class)
                 ->args([
-                    service('type_info.resolver'),
+                    service('.json_encoder.type_resolver'),
                 ]),
         ])
 
@@ -68,7 +75,7 @@ return static function (ContainerConfigurator $container) {
             inline_service(DecodeAttributePropertyMetadataLoader::class)
                 ->args([
                     service('.inner'),
-                    service('type_info.resolver'),
+                    service('.json_encoder.type_resolver'),
                 ]),
             inline_service(DecodeDateTimeTypePropertyMetadataLoader::class)
                 ->args([
@@ -81,7 +88,7 @@ return static function (ContainerConfigurator $container) {
                 ]),
             inline_service(PropertyMetadataLoader::class)
                 ->args([
-                    service('type_info.resolver'),
+                    service('.json_encoder.type_resolver'),
                 ]),
         ])
 
