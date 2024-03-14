@@ -8,7 +8,7 @@ use Mtarld\JsonEncoderBundle\Attribute\EncodedName;
 use Mtarld\JsonEncoderBundle\Attribute\EncodeFormatter;
 use Mtarld\JsonEncoderBundle\Attribute\MaxDepth;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoaderInterface;
-use Symfony\Component\TypeInfo\TypeResolver\TypeResolverInterface;
+use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 
 /**
  * Enhances properties encoding metadata based on properties' attributes.
@@ -19,7 +19,7 @@ final readonly class AttributePropertyMetadataLoader implements PropertyMetadata
 {
     public function __construct(
         private PropertyMetadataLoaderInterface $decorated,
-        private TypeResolverInterface $typeResolver,
+        private TypeResolver $typeResolver,
     ) {
     }
 

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Mtarld\JsonEncoderBundle\Mapping;
 
-use Symfony\Component\TypeInfo\TypeResolver\TypeResolverInterface;
-
 /**
  * Loads basic properties encoding/decoding metadata for a given $className.
  *
@@ -14,7 +12,7 @@ use Symfony\Component\TypeInfo\TypeResolver\TypeResolverInterface;
 final readonly class PropertyMetadataLoader implements PropertyMetadataLoaderInterface
 {
     public function __construct(
-        private TypeResolverInterface $typeResolver,
+        private TypeResolver $typeResolver,
     ) {
     }
 
