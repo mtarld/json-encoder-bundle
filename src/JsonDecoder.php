@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Mtarld\JsonEncoderBundle;
 
+use Mtarld\JsonEncoderBundle\Mapping\Decode\AttributePropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\Decode\DateTimeTypePropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use Psr\Container\ContainerInterface;
 use Mtarld\JsonEncoderBundle\DataModel\Decode\DataModelBuilder;
 use Mtarld\JsonEncoderBundle\Decode\DecodeFrom;
@@ -14,6 +20,9 @@ use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoaderInterface;
 use Mtarld\JsonEncoderBundle\Stream\BufferedStream;
 use Mtarld\JsonEncoderBundle\Stream\StreamReaderInterface;
 use Symfony\Component\TypeInfo\Type;
+use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
+use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
+use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
 
 /**
  * @implements DecoderInterface<array{
@@ -57,5 +66,23 @@ final readonly class JsonDecoder implements DecoderInterface
         }, $config);
 
         return (require $path)($isResourceStream ? $input->getResource() : $input, $config, $isStream ? $this->lazyInstantiator : $this->instantiator, $this->runtimeServices);
+    }
+
+    public static function create(?string $cacheDir = null, ?ContainerInterface $runtimeServices = null): static
+    {
+        $cacheDir ??= sys_get_temp_dir() . '/json_encoder';
+
+        $typeContextFactory = new TypeContextFactory(class_exists(PhpDocParser::class) ? new StringTypeResolver() : null);
+        $typeResolver = new TypeResolver(TypeInfoResolver::create(), $typeContextFactory);
+
+        return new static(new GenericTypePropertyMetadataLoader(
+            new DateTimeTypePropertyMetadataLoader(
+                new AttributePropertyMetadataLoader(
+                    new PropertyMetadataLoader($typeResolver),
+                    $typeResolver,
+                ),
+            ),
+            $typeContextFactory,
+        ), $cacheDir);
     }
 }
