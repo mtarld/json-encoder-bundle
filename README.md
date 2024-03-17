@@ -1,10 +1,9 @@
 # JsonEncoderBundle
 
-## Installation
+A bundle that make the code of the [JsonEncoder component PR](https://github.com/symfony/symfony/pull/51718) 
+available.
 
-Make sure Composer is installed globally, as explained in the
-[installation chapter](https://getcomposer.org/doc/00-intro.md)
-of the Composer documentation.
+## Installation
 
 ### Applications that use Symfony Flex
 
