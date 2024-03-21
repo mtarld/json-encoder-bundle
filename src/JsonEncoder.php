@@ -8,18 +8,17 @@ use Mtarld\JsonEncoderBundle\Mapping\Encode\AttributePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\Encode\DateTimeTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
-use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use Psr\Container\ContainerInterface;
 use Mtarld\JsonEncoderBundle\DataModel\Encode\DataModelBuilder;
 use Mtarld\JsonEncoderBundle\Encode\EncodeAs;
 use Mtarld\JsonEncoderBundle\Encode\EncoderGenerator;
+use Mtarld\JsonEncoderBundle\Mapping\PhpDocAwareReflectionTypeResolver;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoaderInterface;
-use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 use Mtarld\JsonEncoderBundle\Stream\StreamWriterInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
 use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
-use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
+use Symfony\Component\TypeInfo\TypeResolver\TypeResolver;
 
 /**
  * @implements EncoderInterface<array{
@@ -67,8 +66,13 @@ final readonly class JsonEncoder implements EncoderInterface
     {
         $cacheDir ??= sys_get_temp_dir() . '/json_encoder';
 
-        $typeContextFactory = new TypeContextFactory(class_exists(PhpDocParser::class) ? new StringTypeResolver() : null);
-        $typeResolver = new TypeResolver(TypeInfoResolver::create(), $typeContextFactory);
+        try {
+            $stringTypeResolver = new StringTypeResolver();
+        } catch (\Throwable) {
+        }
+
+        $typeContextFactory = new TypeContextFactory($stringTypeResolver ?? null);
+        $typeResolver = new PhpDocAwareReflectionTypeResolver(TypeResolver::create(), $typeContextFactory);
 
         return new static(new GenericTypePropertyMetadataLoader(
             new DateTimeTypePropertyMetadataLoader(
