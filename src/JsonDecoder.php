@@ -8,21 +8,20 @@ use Mtarld\JsonEncoderBundle\Mapping\Decode\AttributePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\Decode\DateTimeTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
-use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use Psr\Container\ContainerInterface;
 use Mtarld\JsonEncoderBundle\DataModel\Decode\DataModelBuilder;
 use Mtarld\JsonEncoderBundle\Decode\DecodeFrom;
 use Mtarld\JsonEncoderBundle\Decode\DecoderGenerator;
 use Mtarld\JsonEncoderBundle\Decode\Instantiator;
 use Mtarld\JsonEncoderBundle\Decode\LazyInstantiator;
+use Mtarld\JsonEncoderBundle\Mapping\PhpDocAwareReflectionTypeResolver;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoaderInterface;
 use Mtarld\JsonEncoderBundle\Stream\BufferedStream;
 use Mtarld\JsonEncoderBundle\Stream\StreamReaderInterface;
 use Symfony\Component\TypeInfo\Type;
 use Symfony\Component\TypeInfo\TypeContext\TypeContextFactory;
 use Symfony\Component\TypeInfo\TypeResolver\StringTypeResolver;
-use Symfony\Component\TypeInfo\TypeResolver\TypeResolver as TypeInfoResolver;
+use Symfony\Component\TypeInfo\TypeResolver\TypeResolver;
 
 /**
  * @implements DecoderInterface<array{
@@ -72,8 +71,13 @@ final readonly class JsonDecoder implements DecoderInterface
     {
         $cacheDir ??= sys_get_temp_dir() . '/json_encoder';
 
-        $typeContextFactory = new TypeContextFactory(class_exists(PhpDocParser::class) ? new StringTypeResolver() : null);
-        $typeResolver = new TypeResolver(TypeInfoResolver::create(), $typeContextFactory);
+        try {
+            $stringTypeResolver = new StringTypeResolver();
+        } catch (\Throwable) {
+        }
+
+        $typeContextFactory = new TypeContextFactory($stringTypeResolver ?? null);
+        $typeResolver = new PhpDocAwareReflectionTypeResolver(TypeResolver::create(), $typeContextFactory);
 
         return new static(new GenericTypePropertyMetadataLoader(
             new DateTimeTypePropertyMetadataLoader(
@@ -83,6 +87,6 @@ final readonly class JsonDecoder implements DecoderInterface
                 ),
             ),
             $typeContextFactory,
-        ), $cacheDir);
+        ), $cacheDir, $runtimeServices);
     }
 }
