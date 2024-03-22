@@ -11,6 +11,7 @@ use PhpParser\Node\Expr\BinaryOp\Identical;
 use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\Instanceof_;
 use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\Throw_;
 use PhpParser\Node\Expr\Yield_;
 use PhpParser\Node\Identifier;
@@ -123,6 +124,7 @@ final readonly class PhpAstBuilder
             $scalarAccessor = match (true) {
                 $dataModelNode->getType() instanceof BackedEnumType => $this->encodeValue(new PropertyFetch($accessor, 'value')),
                 TypeIdentifier::NULL === $dataModelNode->getType()->getTypeIdentifier() => $this->builder->val('null'),
+                TypeIdentifier::BOOL === $dataModelNode->getType()->getTypeIdentifier() => new Ternary($accessor, $this->builder->val('true'), $this->builder->val('false')),
                 default => $this->encodeValue($accessor),
             };
 
@@ -258,11 +260,11 @@ final readonly class PhpAstBuilder
         });
     }
 
-    private function nodeOnlyNeedsEncode(DataModelNodeInterface $node): bool
+    private function nodeOnlyNeedsEncode(DataModelNodeInterface $node, int $nestingLevel = 0): bool
     {
         if ($node instanceof CompositeNode) {
             foreach ($node->nodes as $n) {
-                if (!$this->nodeOnlyNeedsEncode($n)) {
+                if (!$this->nodeOnlyNeedsEncode($n, $nestingLevel + 1)) {
                     return false;
                 }
             }
@@ -271,7 +273,7 @@ final readonly class PhpAstBuilder
         }
 
         if ($node instanceof CollectionNode) {
-            return $this->nodeOnlyNeedsEncode($node->item);
+            return $this->nodeOnlyNeedsEncode($node->item, $nestingLevel + 1);
         }
 
         if ($node instanceof ObjectNode) {
@@ -280,7 +282,7 @@ final readonly class PhpAstBuilder
             }
 
             foreach ($node->properties as $property) {
-                if (!$this->nodeOnlyNeedsEncode($property)) {
+                if (!$this->nodeOnlyNeedsEncode($property, $nestingLevel + 1)) {
                     return false;
                 }
             }
@@ -291,8 +293,15 @@ final readonly class PhpAstBuilder
         if ($node instanceof ScalarNode) {
             $type = $node->getType();
 
+            if ($type instanceof BackedEnumType) {
+                return false;
+            }
+
             // "null" will be written directly using the "null" string
-            return !$type instanceof BackedEnumType && !$type->isA(TypeIdentifier::NULL);
+            // "bool" will be written directly using the "true" or "false" string
+            if ($type->isA(TypeIdentifier::NULL) || $type->isA(TypeIdentifier::BOOL)) {
+                return $nestingLevel > 0;
+            }
         }
 
         return true;
