@@ -170,14 +170,18 @@ final readonly class PhpAstBuilder
                 new Closure([
                     'static' => true,
                     'params' => $params,
-                    'stmts' => [new Return_($this->buildFormatScalarStatement($node, $accessor))],
+                    'stmts' => [new Return_($this->buildFormatValueStatement($node, $accessor))],
                 ]),
             )),
         ];
     }
 
-    private function buildFormatScalarStatement(ScalarNode $node, Expr $accessor): Node
+    private function buildFormatValueStatement(DataModelNodeInterface $node, Expr $accessor): Node
     {
+        if (!$node instanceof ScalarNode) {
+            return $accessor;
+        }
+
         $type = $node->getType();
 
         return match (true) {
@@ -236,7 +240,7 @@ final readonly class PhpAstBuilder
 
         foreach ($node->nodes as $n) {
             if ($this->nodeOnlyNeedsDecode($n, $decodeFrom)) {
-                $nodeValueStmt = $this->buildFormatScalarStatement($n, $this->builder->var('data'));
+                $nodeValueStmt = $this->buildFormatValueStatement($n, $this->builder->var('data'));
             } else {
                 $providersStmts = [...$providersStmts, ...$this->buildProvidersStatements($n, $decodeFrom, $context)];
                 $nodeValueStmt = $this->builder->funcCall(
@@ -294,7 +298,7 @@ final readonly class PhpAstBuilder
                 );
         } else {
             $itemValueStmt = $this->nodeOnlyNeedsDecode($node->item, $decodeFrom)
-                ? $this->buildFormatScalarStatement(
+                ? $this->buildFormatValueStatement(
                     $node->item,
                     $this->builder->staticCall(new FullyQualified(NativeDecoder::class), 'decodeStream', [
                         $this->builder->var('stream'),
@@ -416,7 +420,7 @@ final readonly class PhpAstBuilder
                 );
             } else {
                 $propertyValueStmt = $this->nodeOnlyNeedsDecode($property['value'], $decodeFrom)
-                    ? $this->buildFormatScalarStatement(
+                    ? $this->buildFormatValueStatement(
                         $property['value'],
                         $this->builder->staticCall(new FullyQualified(NativeDecoder::class), 'decodeStream', [
                             $this->builder->var('stream'),
