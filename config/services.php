@@ -22,8 +22,8 @@ use Mtarld\JsonEncoderBundle\Mapping\Decode\DateTimeTypePropertyMetadataLoader a
 use Mtarld\JsonEncoderBundle\Mapping\Encode\AttributePropertyMetadataLoader as EncodeAttributePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\Encode\DateTimeTypePropertyMetadataLoader as EncodeDateTimeTypePropertyMetadataLoader;
 use Mtarld\JsonEncoderBundle\Mapping\GenericTypePropertyMetadataLoader;
+use Mtarld\JsonEncoderBundle\Mapping\PhpDocAwareReflectionTypeResolver;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoader;
-use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 
 return static function (ContainerConfigurator $container) {
     $container->services()
@@ -44,7 +44,7 @@ return static function (ContainerConfigurator $container) {
         ->alias(JsonDecoderInterface::class, 'json_encoder.decoder')
 
         // metadata
-        ->set('.json_encoder.type_resolver', TypeResolver::class)
+        ->set('.json_encoder.type_resolver', PhpDocAwareReflectionTypeResolver::class)
             ->args([
                 service('type_info.resolver'),
                 service('type_info.type_context_factory'),
