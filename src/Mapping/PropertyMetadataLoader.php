@@ -12,7 +12,7 @@ namespace Mtarld\JsonEncoderBundle\Mapping;
 final readonly class PropertyMetadataLoader implements PropertyMetadataLoaderInterface
 {
     public function __construct(
-        private TypeResolver $typeResolver,
+        private PhpDocAwareReflectionTypeResolver $typeResolver,
     ) {
     }
 

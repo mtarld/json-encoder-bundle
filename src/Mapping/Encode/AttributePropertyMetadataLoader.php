@@ -7,8 +7,8 @@ namespace Mtarld\JsonEncoderBundle\Mapping\Encode;
 use Mtarld\JsonEncoderBundle\Attribute\EncodedName;
 use Mtarld\JsonEncoderBundle\Attribute\EncodeFormatter;
 use Mtarld\JsonEncoderBundle\Attribute\MaxDepth;
+use Mtarld\JsonEncoderBundle\Mapping\PhpDocAwareReflectionTypeResolver;
 use Mtarld\JsonEncoderBundle\Mapping\PropertyMetadataLoaderInterface;
-use Mtarld\JsonEncoderBundle\Mapping\TypeResolver;
 
 /**
  * Enhances properties encoding metadata based on properties' attributes.
@@ -19,7 +19,7 @@ final readonly class AttributePropertyMetadataLoader implements PropertyMetadata
 {
     public function __construct(
         private PropertyMetadataLoaderInterface $decorated,
-        private TypeResolver $typeResolver,
+        private PhpDocAwareReflectionTypeResolver $typeResolver,
     ) {
     }
 
