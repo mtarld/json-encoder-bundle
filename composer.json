@@ -11,7 +11,7 @@
         "psr/container": "^2.0|^3.0",
         "psr/log": "^1|^2|^3",
         "symfony/framework-bundle": "^7.0",
-        "symfony/type-info": "7.1.x-dev",
+        "symfony/type-info": "^7.1",
         "symfony/var-exporter": "^7.1"
     },
     "config": {
